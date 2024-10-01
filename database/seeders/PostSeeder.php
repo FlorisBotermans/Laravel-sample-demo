@@ -25,7 +25,7 @@ class PostSeeder extends Seeder
 
         $this->truncate('posts');
 
-        $posts = Post::factory(3)
+        $posts = Post::factory(200)
             // Has creates 3 comments for each post. This has as side effect which mean that not only it creates records in the Comment table but also in the Post table.
             // ->has(Comment::factory(3), 'comments')
             ->untitled()
