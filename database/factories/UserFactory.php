@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
+// Factories are used to generate consistent and realistic data for testing.
 class UserFactory extends Factory
 {
     /**
