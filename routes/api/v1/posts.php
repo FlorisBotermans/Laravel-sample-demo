@@ -9,7 +9,7 @@ Route::middleware([
     // 'auth',
     // \App\Http\Middleware\RedirectIfAuthenticated::class
     ])
-    ->prefix('heyaa')
+    // ->prefix('heyaa')
     ->name('posts.')
     ->namespace('\App\Http\Controllers')
     ->group(function() {

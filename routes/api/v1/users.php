@@ -9,7 +9,7 @@ Route::middleware([
     // 'auth',
     // \App\Http\Middleware\RedirectIfAuthenticated::class
     ])
-    ->prefix('heyaa')
+    // ->prefix('heyaa')
     ->name('users.')
     // As does the same thing as name.
     // ->as('index.')

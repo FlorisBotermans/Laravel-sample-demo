@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\GeneralJsonException;
 use App\Http\Requests\StorepostRequest;
 use App\Http\Requests\UpdatepostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Repositories\PostRepository;
+use App\Rules\IntegerArray;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
@@ -34,16 +37,44 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param StorepostRequest $request
+     * @return PostResource
      */
     public function store(Request $request, PostRepository $repository)
     {
-        $created = $repository->create($request->only([
+        $payload = $request->only([
             'title',
             'body',
             'user_ids'
-        ]));
+        ]);
+
+        // Validation using request class. Better approach because won't pollute our controller.
+        // $created = $repository->create($payload);
+
+        // Validation using validator. Can use for more flexibility because it has a lot more helper functions.
+        $validator = Validator::make($payload, [
+            'title' => ['string', 'required'],
+            'body' => ['string', 'required'],
+            'user_ids' => [
+                'array', 
+                'required',
+                // We can create custom validation rule either by closure or a dedicated rule class.
+                new IntegerArray(),
+            ]
+        ], [
+            'body.required' => "Please enter a value for body.",
+            'title.string' => 'HEYYYY use a string.',
+        ], [
+            'user_ids' => 'USER IDDDD'
+        ]);
+
+        // The validator has a lot of helper functions.
+        // $errors = $validator->errors();
+        // dd($validator->fails());
+
+        $validator->validate();
+
+        $created = $repository->create($payload);
 
 
         return new PostResource($created);

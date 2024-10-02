@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Models\User\UserCreated;
 use App\Http\Requests\StoreuserRequest;
 use App\Http\Requests\UpdateuserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -17,9 +20,10 @@ class UserController extends Controller
      */
     public function index()
     {
-        return new JsonResponse([
-            'data' => 'aaaa'
-        ]);
+        event(new UserCreated(User::factory()->make()));
+        $users = User::query()->paginate($request->page_size ?? 20);
+        
+        return UserResource::collection($users);
     }
 
     /**
@@ -28,11 +32,16 @@ class UserController extends Controller
      * @param  \App\Http\Requests\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request, UserRepository $repository)
     {
-        return new JsonResponse([
-            'data' => 'posted'
-        ]);
+        $created = $repository->create($request->only([
+            'name',
+            'email',
+        ]));
+
+        // ....
+
+        return new UserResource($created);
     }
 
     /**
@@ -43,9 +52,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return new JsonResponse([
-            'data' => $user
-        ]);
+        return new UserResource($user);
     }
 
     /**
@@ -55,11 +62,14 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user, UserRepository $repository)
     {
-        return new JsonResponse([
-            'data' => 'patched'
-        ]);
+        $user = $repository->update($user, $request->only([
+            'name',
+            'email',
+        ]));
+
+        return new UserResource($user);
     }
 
     /**
@@ -68,10 +78,11 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(User $user)
+    public function destroy(User $user, UserRepository $repository)
     {
+        $deleted = $repository->forceDelete($user);
         return new JsonResponse([
-            'data' => 'deleted'
+            'data' => 'success',
         ]);
     }
 }
